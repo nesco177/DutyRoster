@@ -30,7 +30,7 @@
       margin-top: 10px;
     }
 
-    select, input, button {
+    select, input[type="date"], button {
       width: 100%;
       padding: 10px;
       margin-top: 5px;
@@ -38,6 +38,7 @@
       font-size: 1rem;
       border-radius: 6px;
       border: 1px solid #ccc;
+      box-sizing: border-box;
     }
 
     button {
@@ -97,7 +98,7 @@
     }
 
     .result-name {
-      font-size: 0.9rem;
+      font-size: 1rem; /* Increased from 0.9rem */
       font-weight: 500;
       color: #444;
       cursor: pointer;
@@ -139,19 +140,19 @@
 
     <div id="results">
       <div class="result-box" id="card1">
-        <div class="result-label">Name 1:</div>
+        <div class="result-label">Maintenance:</div>
         <div id="col1" class="result-content"></div>
       </div>
       <div class="result-box" id="card2">
-        <div class="result-label">Name 2:</div>
+        <div class="result-label">Complain:</div>
         <div id="col2" class="result-content"></div>
       </div>
       <div class="result-box" id="card3">
-        <div class="result-label">Name 3:</div>
+        <div class="result-label">Bindur Mor S/S:</div>
         <div id="col3" class="result-content"></div>
       </div>
       <div class="result-box" id="card4">
-        <div class="result-label">Name 4:</div>
+        <div class="result-label">City Central S/S:</div>
         <div id="col4" class="result-content"></div>
       </div>
     </div>
