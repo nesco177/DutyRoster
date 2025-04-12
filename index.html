@@ -62,44 +62,25 @@
       color: red;
     }
 
-    /* Hide the entire result section initially */
     #results {
-      display: none; /* Hide results by default */
+      display: none;
       margin-top: 20px;
       display: grid;
       gap: 20px;
     }
 
-    /* Hide individual result cards initially */
     .result-box {
-      display: none; /* Hide individual result cards by default */
+      display: none;
       background-color: #f9fbfd;
       border-left: 6px solid #007bff;
       padding: 18px 20px;
       border-radius: 14px;
       box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
 
-    .result-box:nth-child(2) {
-      background-color: #f0f8ff;
-      border-left-color: #17a2b8;
-    }
-
-    .result-box:nth-child(3) {
-      background-color: #fef8f3;
-      border-left-color: #ffc107;
-    }
-
-    .result-box:nth-child(4) {
-      background-color: #f4fdf6;
-      border-left-color: #28a745;
-    }
-
-    .result-box:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08);
-    }
+    .result-box:nth-child(2) { background-color: #f0f8ff; border-left-color: #17a2b8; }
+    .result-box:nth-child(3) { background-color: #fef8f3; border-left-color: #ffc107; }
+    .result-box:nth-child(4) { background-color: #f4fdf6; border-left-color: #28a745; }
 
     .result-label {
       font-size: 1rem;
@@ -110,14 +91,13 @@
 
     .result-content {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
+      flex-direction: column;
       gap: 10px;
+      align-items: flex-start;
     }
 
     .result-name {
-      font-size: 1rem;
+      font-size: 0.9rem;
       font-weight: 500;
       color: #444;
       cursor: pointer;
@@ -126,35 +106,20 @@
       border-radius: 6px;
       background-color: #f1f1f1;
       transition: background-color 0.3s ease, color 0.3s ease;
+      display: inline-block;
     }
 
     .result-name:hover {
       background-color: #007BFF;
       color: white;
     }
-
-    .phone-link {
-      background-color: #007BFF;
-      color: #fff;
-      padding: 6px 14px;
-      border-radius: 8px;
-      text-decoration: none;
-      font-size: 0.9rem;
-      font-weight: 500;
-      transition: background-color 0.2s ease;
-    }
-
-    .phone-link:hover {
-      background-color: #0056b3;
-    }
-
   </style>
 </head>
 <body>
   <div class="container">
-    <h2>Shift Finder</h2>
+    <h2>Duty Roster</h2>
 
-    <div class="status" id="status">Loading Excel file...</div>
+    <div class="status" id="status">Loading...</div>
 
     <label for="date">Select Date:</label>
     <input type="date" id="date">
@@ -201,7 +166,7 @@
         const workbook = XLSX.read(data, { type: "array" });
         const sheet = workbook.Sheets[workbook.SheetNames[0]];
         workbookData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-        document.getElementById("status").textContent = "Excel file loaded successfully.";
+        document.getElementById("status").textContent = "✅ Ready";
       })
       .catch(err => {
         document.getElementById("status").textContent = "Failed to load Excel file.";
@@ -235,13 +200,15 @@
       const error = document.getElementById("error");
       const results = document.getElementById("results");
       error.textContent = "";
-      results.style.display = "none"; // Ensure results are hidden before search
+      results.style.display = "none";
 
-      // Hide all the individual result cards initially
-      document.getElementById("card1").style.display = "none";
-      document.getElementById("card2").style.display = "none";
-      document.getElementById("card3").style.display = "none";
-      document.getElementById("card4").style.display = "none";
+      ["col1", "col2", "col3", "col4"].forEach(id => {
+        document.getElementById(id).innerHTML = "";
+      });
+
+      ["card1", "card2", "card3", "card4"].forEach(id => {
+        document.getElementById(id).style.display = "none";
+      });
 
       if (!dateInputRaw || !shiftInput) {
         error.textContent = "Please select both date and shift.";
@@ -249,19 +216,29 @@
       }
 
       const formattedInputDate = formatDate(new Date(dateInputRaw));
+      let lastDate = "", lastShift = "";
 
-      const matchingRow = workbookData.find(row => {
+      const matchingRows = workbookData.filter(row => {
+        let currentDate = row[0];
+        let currentShift = row[1];
+
+        if (!currentDate || currentDate.toString().trim() === "") currentDate = lastDate;
+        else lastDate = currentDate;
+
+        if (!currentShift || currentShift.toString().trim() === "") currentShift = lastShift;
+        else lastShift = currentShift;
+
         let formattedExcelDate = "";
 
         try {
-          if (row[0] instanceof Date) {
-            formattedExcelDate = formatDate(row[0]);
-          } else if (typeof row[0] === "number") {
-            const excelDate = XLSX.SSF.parse_date_code(row[0]);
+          if (currentDate instanceof Date) {
+            formattedExcelDate = formatDate(currentDate);
+          } else if (typeof currentDate === "number") {
+            const excelDate = XLSX.SSF.parse_date_code(currentDate);
             const jsDate = new Date(excelDate.y, excelDate.m - 1, excelDate.d);
             formattedExcelDate = formatDate(jsDate);
-          } else if (typeof row[0] === "string") {
-            const parts = row[0].split(/[\/\-]/);
+          } else if (typeof currentDate === "string") {
+            const parts = currentDate.split(/[\/\-]/);
             if (parts.length === 3) {
               const jsDate = new Date(parts[2], parts[1] - 1, parts[0]);
               formattedExcelDate = formatDate(jsDate);
@@ -271,39 +248,38 @@
           console.error("Date parse error", e);
         }
 
-        const shift = (row[1] || "").toString().trim().toLowerCase();
-
         return (
-          shift === shiftInput.toLowerCase() &&
-          formattedExcelDate === formattedInputDate
+          formattedExcelDate === formattedInputDate &&
+          currentShift.toString().trim().toLowerCase() === shiftInput.toLowerCase()
         );
       });
 
-      if (matchingRow) {
-        const name1 = matchingRow[2] || "";
-        const phone1 = matchingRow[3] || "";
-        const name2 = matchingRow[4] || "";
-        const phone2 = matchingRow[5] || "";
-        const name3 = matchingRow[6] || "";
-        const phone3 = matchingRow[7] || "";
-        const name4 = matchingRow[8] || "";
-        const phone4 = matchingRow[9] || "";
-
-        document.getElementById("col1").innerHTML = `<span class="result-name" onclick="window.location.href='tel:${phone1}'">${name1}</span>`;
-        document.getElementById("col2").innerHTML = `<span class="result-name" onclick="window.location.href='tel:${phone2}'">${name2}</span>`;
-        document.getElementById("col3").innerHTML = `<span class="result-name" onclick="window.location.href='tel:${phone3}'">${name3}</span>`;
-        document.getElementById("col4").innerHTML = `<span class="result-name" onclick="window.location.href='tel:${phone4}'">${name4}</span>`;
-
-        // Show the results after search
-        results.style.display = "grid"; // Show results container
-        // Show each result card after finding matching data
-        document.getElementById("card1").style.display = "block";
-        document.getElementById("card2").style.display = "block";
-        document.getElementById("card3").style.display = "block";
-        document.getElementById("card4").style.display = "block";
-      } else {
+      if (matchingRows.length === 0) {
         error.textContent = "No matching shifts found for the selected date and time.";
+        return;
       }
+
+      results.style.display = "grid";
+
+      matchingRows.forEach(row => {
+        const data = [
+          [row[2], row[3]],
+          [row[4], row[5]],
+          [row[6], row[7]],
+          [row[8], row[9]]
+        ];
+
+        data.forEach(([name, phone], i) => {
+          if (name) {
+            const colId = "col" + (i + 1);
+            const cardId = "card" + (i + 1);
+            document.getElementById(colId).innerHTML += `
+              <span class="result-name" onclick="window.location.href='tel:${phone}'">${name}</span>
+            `;
+            document.getElementById(cardId).style.display = "block";
+          }
+        });
+      });
     }
   </script>
 </body>
