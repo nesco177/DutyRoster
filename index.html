@@ -79,9 +79,10 @@
       box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
     }
 
-    .result-box:nth-child(2) { background-color: #f0f8ff; border-left-color: #17a2b8; }
-    .result-box:nth-child(3) { background-color: #fef8f3; border-left-color: #ffc107; }
-    .result-box:nth-child(4) { background-color: #f4fdf6; border-left-color: #28a745; }
+    .result-box:nth-child(2) { background-color: #eaf4fc; border-left-color: #6f42c1; }
+    .result-box:nth-child(3) { background-color: #f0f8ff; border-left-color: #17a2b8; }
+    .result-box:nth-child(4) { background-color: #fef8f3; border-left-color: #ffc107; }
+    .result-box:nth-child(5) { background-color: #f4fdf6; border-left-color: #28a745; }
 
     .result-label {
       font-size: 1rem;
@@ -98,7 +99,7 @@
     }
 
     .result-name {
-      font-size: 1rem; /* Increased from 0.9rem */
+      font-size: 1rem;
       font-weight: 500;
       color: #444;
       cursor: pointer;
@@ -139,6 +140,10 @@
     <div id="error" class="error"></div>
 
     <div id="results">
+      <div class="result-box" id="card0">
+        <div class="result-label">Complain Attendent:</div>
+        <div id="col0" class="result-content"></div>
+      </div>
       <div class="result-box" id="card1">
         <div class="result-label">Maintenance:</div>
         <div id="col1" class="result-content"></div>
@@ -203,11 +208,11 @@
       error.textContent = "";
       results.style.display = "none";
 
-      ["col1", "col2", "col3", "col4"].forEach(id => {
+      ["col0", "col1", "col2", "col3", "col4"].forEach(id => {
         document.getElementById(id).innerHTML = "";
       });
 
-      ["card1", "card2", "card3", "card4"].forEach(id => {
+      ["card0", "card1", "card2", "card3", "card4"].forEach(id => {
         document.getElementById(id).style.display = "none";
       });
 
@@ -264,16 +269,17 @@
 
       matchingRows.forEach(row => {
         const data = [
-          [row[2], row[3]],
-          [row[4], row[5]],
-          [row[6], row[7]],
-          [row[8], row[9]]
+          [row[10], row[11]], // Control Room
+          [row[2], row[3]],   // Maintenance
+          [row[4], row[5]],   // Complain
+          [row[6], row[7]],   // Bindur Mor
+          [row[8], row[9]]    // City Central
         ];
 
         data.forEach(([name, phone], i) => {
           if (name) {
-            const colId = "col" + (i + 1);
-            const cardId = "card" + (i + 1);
+            const colId = "col" + i;
+            const cardId = "card" + i;
             document.getElementById(colId).innerHTML += `
               <span class="result-name" onclick="window.location.href='tel:${phone}'">${name}</span>
             `;
