@@ -9,6 +9,7 @@
       font-family: Arial, sans-serif;
       margin: 2em;
       background: #f4f6f8;
+      color: #333;
     }
 
     .container {
@@ -46,6 +47,7 @@
       font-weight: bold;
       border: none;
       cursor: pointer;
+      transition: background-color 0.3s ease;
     }
 
     button:hover {
@@ -67,6 +69,7 @@
       margin-top: 20px;
       display: grid;
       gap: 20px;
+      grid-template-columns: 1fr;
     }
 
     .result-box {
@@ -75,7 +78,6 @@
       border-left: 6px solid #007bff;
       padding: 18px 20px;
       border-radius: 14px;
-      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
     }
 
     .result-box:nth-child(2) { background-color: #eaf4fc; border-left-color: #6f42c1; }
@@ -103,16 +105,30 @@
       color: #444;
       cursor: pointer;
       text-decoration: none;
-      padding: 6px 12px;
-      border-radius: 6px;
+      padding: 8px 20px; /* Increased padding for better click area */
+      border-radius: 25px; /* Fully rounded corners for buttons */
       background-color: #f1f1f1;
-      transition: background-color 0.3s ease, color 0.3s ease;
+      margin: 5px 0; /* Added margin between buttons for spacing */
+      transition: background-color 0.3s ease, color 0.3s ease, transform 0.3s ease;
       display: inline-block;
+      text-align: center; /* Centering text */
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Soft shadow for 3D effect */
     }
+
+    /* Role-based color differentiation */
+    .result-name.LM { background-color: #eaf4fc; }
+    .result-name.LH { background-color: #f4fdf6; }
+    .result-name.EA { background-color: #fef8f3; }
+    .result-name.LEM { background-color: #eaf4fc; }
 
     .result-name:hover {
       background-color: #007BFF;
       color: white;
+      transform: translateY(-2px); /* Slight hover animation */
+    }
+
+    .result-name:active {
+      transform: translateY(0); /* Button press effect */
     }
   </style>
 </head>
@@ -140,7 +156,7 @@
 
     <div id="results">
       <div class="result-box" id="card0">
-        <div class="result-label">Complain Attendent:</div>
+        <div class="result-label">Complain Attendant:</div>
         <div id="col0" class="result-content"></div>
       </div>
       <div class="result-box" id="card1">
@@ -280,7 +296,7 @@
             const colId = "col" + i;
             const cardId = "card" + i;
             document.getElementById(colId).innerHTML += `
-              <span class="result-name" onclick="window.location.href='tel:${phone}'">${name}</span>
+              <span class="result-name ${i === 0 ? 'LM' : i === 1 ? 'LH' : i === 2 ? 'EA' : 'LEM'}" onclick="window.location.href='tel:${phone}'">${name}</span>
             `;
             document.getElementById(cardId).style.display = "block";
           }
