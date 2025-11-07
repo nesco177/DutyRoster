@@ -115,7 +115,6 @@
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
     }
 
-    
     .result-name.LM { background-color: #eaf4fc; }
     .result-name.LH { background-color: #f4fdf6; }
     .result-name.EA { background-color: #fef8f3; }
@@ -181,18 +180,71 @@
   <script>
     let workbookData = [];
 
-    fetch("https://raw.githubusercontent.com/nesco177/DutyRoster/main/Duty.xlsx")
-      .then(res => res.arrayBuffer())
-      .then(data => {
-        const workbook = XLSX.read(data, { type: "array" });
+    const DATA_KEY = "dutyRoster:data";
+    const TS_KEY = "dutyRoster:lastLoaded";
+    const EXCEL_URL = "https://raw.githubusercontent.com/nesco177/DutyRoster/main/Duty.xlsx";
+    const TTL_HOURS = 24;
+
+    function hoursSince(ts) {
+      if (!ts) return Infinity;
+      const diffMs = Date.now() - new Date(ts).getTime();
+      return diffMs / (1000 * 60 * 60);
+    }
+
+    function loadFromCache() {
+      try {
+        const raw = localStorage.getItem(DATA_KEY);
+        return raw ? JSON.parse(raw) : null;
+      } catch {
+        return null;
+      }
+    }
+
+    function saveToCache(data) {
+      try {
+        localStorage.setItem(DATA_KEY, JSON.stringify(data));
+        localStorage.setItem(TS_KEY, new Date().toISOString());
+      } catch (e) {
+        
+        console.warn("Cache save failed:", e);
+      }
+    }
+
+    async function loadDataOncePerDay() {
+      const statusEl = document.getElementById("status");
+      const lastTs = localStorage.getItem(TS_KEY);
+      const cached = loadFromCache();
+
+      
+      if (cached && hoursSince(lastTs) < TTL_HOURS) {
+        workbookData = cached;
+        statusEl.textContent = "✅ Ready for today";
+        return;
+      }
+
+     
+      try {
+        const res = await fetch(EXCEL_URL, { cache: "no-store" });
+        const buf = await res.arrayBuffer();
+        const workbook = XLSX.read(buf, { type: "array" });
         const sheet = workbook.Sheets[workbook.SheetNames[0]];
         workbookData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-        document.getElementById("status").textContent = "✅ Ready";
-      })
-      .catch(err => {
-        document.getElementById("status").textContent = "❌ Failed";
+        saveToCache(workbookData);
+        statusEl.textContent = "✅ Ready";
+      } catch (err) {
         console.error(err);
-      });
+        if (cached) {
+      
+          workbookData = cached;
+          statusEl.textContent = "⚠️ Ready (stale cache; fetch failed)";
+        } else {
+          statusEl.textContent = "❌ Failed";
+        }
+      }
+    }
+
+    
+    loadDataOncePerDay();
 
     function formatDate(date) {
       const d = new Date(date);
@@ -288,7 +340,7 @@
           [row[2], row[3]],   
           [row[4], row[5]],   
           [row[6], row[7]],   
-          [row[8], row[9]]   
+          [row[8], row[9]]    
         ];
 
         data.forEach(([name, phone], i) => {
