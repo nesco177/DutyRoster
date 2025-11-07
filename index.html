@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Shift Finder</title>
+  <title>Duty Roaster</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
     body {
@@ -105,17 +105,17 @@
       color: #444;
       cursor: pointer;
       text-decoration: none;
-      padding: 8px 20px; /* Increased padding for better click area */
-      border-radius: 25px; /* Fully rounded corners for buttons */
+      padding: 8px 20px; 
+      border-radius: 25px; 
       background-color: #f1f1f1;
-      margin: 5px 0; /* Added margin between buttons for spacing */
+      margin: 5px 0; 
       transition: background-color 0.3s ease, color 0.3s ease, transform 0.3s ease;
       display: inline-block;
-      text-align: center; /* Centering text */
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Soft shadow for 3D effect */
+      text-align: center; 
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
     }
 
-    /* Role-based color differentiation */
+    
     .result-name.LM { background-color: #eaf4fc; }
     .result-name.LH { background-color: #f4fdf6; }
     .result-name.EA { background-color: #fef8f3; }
@@ -124,11 +124,11 @@
     .result-name:hover {
       background-color: #007BFF;
       color: white;
-      transform: translateY(-2px); /* Slight hover animation */
+      transform: translateY(-2px); 
     }
 
     .result-name:active {
-      transform: translateY(0); /* Button press effect */
+      transform: translateY(0); 
     }
   </style>
 </head>
@@ -284,11 +284,11 @@
 
       matchingRows.forEach(row => {
         const data = [
-          [row[10], row[11]], // Control Room
-          [row[2], row[3]],   // Maintenance
-          [row[4], row[5]],   // Complain
-          [row[6], row[7]],   // Bindur Mor
-          [row[8], row[9]]    // City Central
+          [row[10], row[11]], 
+          [row[2], row[3]],   
+          [row[4], row[5]],   
+          [row[6], row[7]],   
+          [row[8], row[9]]   
         ];
 
         data.forEach(([name, phone], i) => {
@@ -306,4 +306,3 @@
   </script>
 </body>
 </html>
-
