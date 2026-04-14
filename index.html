@@ -1,360 +1,360 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Duty Roaster</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 2em;
-      background: #f4f6f8;
-      color: #333;
-    }
+<meta charset="UTF-8">
+<title>Duty Roaster</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
-    .container {
-      background: white;
-      padding: 20px;
-      border-radius: 12px;
-      max-width: 600px;
-      margin: auto;
-    }
+<style>
+body {
+  font-family: Arial;
+  margin: 2em;
+  background: #f4f6f8;
+}
 
-    h2 {
-      color: #333;
-      text-align: center;
-    }
+.container {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  max-width: 600px;
+  margin: auto;
+}
 
-    label {
-      font-weight: bold;
-      margin-top: 10px;
-    }
+h2 { text-align: center; }
 
-    select, input[type="date"], button {
-      width: 100%;
-      padding: 10px;
-      margin-top: 5px;
-      margin-bottom: 15px;
-      font-size: 1rem;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      box-sizing: border-box;
-    }
+label {
+  font-weight: bold;
+  margin-top: 10px;
+  display:block;
+}
 
-    button {
-      background-color: #007BFF;
-      color: white;
-      font-weight: bold;
-      border: none;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
+input, select {
+  width: 100%;
+  padding: 10px;
+  margin-top: 5px;
+  margin-bottom: 12px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+}
 
-    button:hover {
-      background-color: #0056b3;
-    }
+button {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 6px;
+  border: none;
+  background: #007BFF;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
 
-    .status, .error {
-      font-weight: bold;
-      text-align: center;
-      margin: 10px 0;
-    }
+.status {
+  text-align: center;
+  font-weight: bold;
+}
 
-    .error {
-      color: red;
-    }
+.error {
+  text-align: center;
+  color: red;
+}
 
-    #results {
-      display: none;
-      margin-top: 20px;
-      display: grid;
-      gap: 20px;
-      grid-template-columns: 1fr;
-    }
+#results {
+  display: none;
+  margin-top: 20px;
+  display: grid;
+  gap: 20px;
+}
 
-    .result-box {
-      display: none;
-      background-color: #f9fbfd;
-      border-left: 6px solid #007bff;
-      padding: 18px 20px;
-      border-radius: 14px;
-    }
+.result-box {
+  display: none;
+  padding: 18px;
+  border-radius: 14px;
+  border-left: 6px solid #007bff;
+  background: #f9fbfd;
+}
 
-    .result-box:nth-child(2) { background-color: #eaf4fc; border-left-color: #6f42c1; }
-    .result-box:nth-child(3) { background-color: #f0f8ff; border-left-color: #17a2b8; }
-    .result-box:nth-child(4) { background-color: #fef8f3; border-left-color: #ffc107; }
-    .result-box:nth-child(5) { background-color: #f4fdf6; border-left-color: #28a745; }
+.result-box:nth-child(2){ background:#eaf4fc; border-left:#6f42c1 solid 6px;}
+.result-box:nth-child(3){ background:#f0f8ff; border-left:#17a2b8 solid 6px;}
+.result-box:nth-child(4){ background:#fef8f3; border-left:#ffc107 solid 6px;}
+.result-box:nth-child(5){ background:#f4fdf6; border-left:#28a745 solid 6px;}
 
-    .result-label {
-      font-size: 1rem;
-      font-weight: 600;
-      margin-bottom: 10px;
-      color: #333;
-    }
+.result-label {
+  font-weight:600;
+  margin-bottom:10px;
+}
 
-    .result-content {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      align-items: flex-start;
-    }
+.result-content {
+  display:flex;
+  flex-direction:column;
+  gap:20px;
+}
 
-    .result-name {
-      font-size: 1rem;
-      font-weight: 500;
-      color: #444;
-      cursor: pointer;
-      text-decoration: none;
-      padding: 8px 20px; 
-      border-radius: 25px; 
-      background-color: #f1f1f1;
-      margin: 5px 0; 
-      transition: background-color 0.3s ease, color 0.3s ease, transform 0.3s ease;
-      display: inline-block;
-      text-align: center; 
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
-    }
+.result-name {
+  padding:8px 14px;
+  border-radius:20px;
+  background:#f1f1f1;
+  white-space:nowrap;
+  box-shadow:0 3px 6px rgba(0,0,0,0.1);
+  cursor:pointer;
+  display:inline-block;
+  width:fit-content;
+}
 
-    .result-name.LM { background-color: #eaf4fc; }
-    .result-name.LH { background-color: #f4fdf6; }
-    .result-name.EA { background-color: #fef8f3; }
-    .result-name.LEM { background-color: #eaf4fc; }
+.result-name:hover{
+  background:#007BFF;
+  color:white;
+}
 
-    .result-name:hover {
-      background-color: #007BFF;
-      color: white;
-      transform: translateY(-2px); 
-    }
+#col0 .result-name{ background:#f5fff6; }
+#col1 .result-name{ background:#f6fbff; }
+#col2 .result-name{ background:#fffcf7; }
+#col3 .result-name{ background:#f5fff6; }
+#col4 .result-name{ background:#fffef3; }
 
-    .result-name:active {
-      transform: translateY(0); 
-    }
-  </style>
+#col0 .result-name:hover{ background:#a5d6a7; color:#000; }
+#col1 .result-name:hover{ background:#90caf9; color:#000; }
+#col2 .result-name:hover{ background:#ffcc80; color:#000; }
+#col3 .result-name:hover{ background:#a5d6a7; color:#000; }
+#col4 .result-name:hover{ background:#fff59d; color:#000; }
+
+</style>
 </head>
+
 <body>
-  <div class="container">
-    <h2>Duty Roster</h2>
 
-    <div class="status" id="status">Loading...</div>
+<div class="container">
 
-    <label for="date">Select Date:</label>
-    <input type="date" id="date">
+<h2>Duty Roster</h2>
+<div class="status" id="status">Loading...</div>
 
-    <label for="shift">Select Shift:</label>
-    <select id="shift">
-      <option value="">-- Select Shift --</option>
-      <option value="Morning">Morning</option>
-      <option value="Afternoon">Afternoon</option>
-      <option value="Night">Night</option>
-    </select>
+<label>Select Date:</label>
+<input type="date" id="date">
 
-    <button onclick="fillJustNow()">Just Now</button>
-    <button onclick="searchShift()">Search</button>
+<label>Select Shift:</label>
+<select id="shift">
+<option value="">-- Select Shift --</option>
+<option>Morning</option>
+<option>Afternoon</option>
+<option>Night</option>
+</select>
 
-    <div id="error" class="error"></div>
+<button onclick="fillJustNow()">Just Now</button>
+<button onclick="searchShift()">Search</button>
 
-    <div id="results">
-      <div class="result-box" id="card0">
-        <div class="result-label">Complain Attendant:</div>
-        <div id="col0" class="result-content"></div>
-      </div>
-      <div class="result-box" id="card1">
-        <div class="result-label">Maintenance:</div>
-        <div id="col1" class="result-content"></div>
-      </div>
-      <div class="result-box" id="card2">
-        <div class="result-label">Complain:</div>
-        <div id="col2" class="result-content"></div>
-      </div>
-      <div class="result-box" id="card3">
-        <div class="result-label">Bindur Mor S/S:</div>
-        <div id="col3" class="result-content"></div>
-      </div>
-      <div class="result-box" id="card4">
-        <div class="result-label">City Central S/S:</div>
-        <div id="col4" class="result-content"></div>
-      </div>
-    </div>
-  </div>
+<div id="error" class="error"></div>
 
-  <script>
-    let workbookData = [];
+<div id="results">
 
-    const DATA_KEY = "dutyRoster:data";
-    const TS_KEY = "dutyRoster:lastLoaded";
-    const EXCEL_URL = "https://raw.githubusercontent.com/nesco177/DutyRoster/main/Duty.xlsx";
-    const TTL_HOURS = 24;
+<div class="result-box" id="card0">
+<div class="result-label">Complain Attendant:</div>
+<div id="col0" class="result-content"></div>
+</div>
 
-    function hoursSince(ts) {
-      if (!ts) return Infinity;
-      const diffMs = Date.now() - new Date(ts).getTime();
-      return diffMs / (1000 * 60 * 60);
-    }
+<div class="result-box" id="card1">
+<div class="result-label">Maintenance:</div>
+<div id="col1" class="result-content"></div>
+</div>
 
-    function loadFromCache() {
-      try {
-        const raw = localStorage.getItem(DATA_KEY);
-        return raw ? JSON.parse(raw) : null;
-      } catch {
-        return null;
+<div class="result-box" id="card2">
+<div class="result-label">Complain:</div>
+<div id="col2" class="result-content"></div>
+</div>
+
+<div class="result-box" id="card3">
+<div class="result-label">Bindur Mor S/S:</div>
+<div id="col3" class="result-content"></div>
+</div>
+
+<div class="result-box" id="card4">
+<div class="result-label">City Central S/S:</div>
+<div id="col4" class="result-content"></div>
+</div>
+
+</div>
+</div>
+
+<script>
+
+let teamData = {};
+
+const URL="https://raw.githubusercontent.com/nesco177/DutyRoster/main/Duty.xlsx";
+
+const DATA_KEY = "duty_cache";
+const TS_KEY = "duty_cache_time";
+
+function hoursSince(ts){
+  if(!ts) return 999;
+  let diff = new Date() - new Date(ts);
+  return diff / (1000 * 60 * 60);
+}
+
+async function loadData(){
+  let cache = localStorage.getItem(DATA_KEY);
+  let ts = localStorage.getItem(TS_KEY);
+
+  if(cache && hoursSince(ts) < 24){
+    teamData = JSON.parse(cache);
+    document.getElementById("status").innerText = "✅ Ready for today";
+    return;
+  }
+
+  try{
+    const res = await fetch(URL,{cache:"no-store"});
+    const buf = await res.arrayBuffer();
+    const wb = XLSX.read(buf,{type:"array"});
+
+    let data={};
+    wb.SheetNames.forEach(n=>{
+      data[n]=XLSX.utils.sheet_to_json(wb.Sheets[n],{header:1});
+    });
+
+    teamData=data;
+
+    localStorage.setItem(DATA_KEY,JSON.stringify(data));
+    localStorage.setItem(TS_KEY,new Date().toISOString());
+
+    document.getElementById("status").innerText="✅ Ready";
+
+  }catch{
+    document.getElementById("status").innerText="❌ Failed";
+  }
+}
+
+loadData();
+
+function fillJustNow(){
+  let now=new Date();
+  date.value=now.toISOString().split('T')[0];
+
+  let h=now.getHours();
+  shift.value=h<14?"Morning":h<22?"Afternoon":"Night";
+}
+
+function safeTel(p){
+  if(p === undefined || p === null) return "0";
+  let s = String(p).trim().replace(/[\s\-()]/g,"");
+  if(s === "") return "0";
+  return s;
+}
+
+function getMaintenanceTeam(date,shift){
+  const base=new Date(2026,2,30);
+  const d=Math.floor((date-base)/(1000*60*60*24));
+  const c=((d%6)+6)%6;
+
+  if(c<=2){
+    if(shift==="Afternoon") return "Team1";
+    if(shift==="Morning") return "Team2";
+  }else{
+    if(shift==="Morning") return "Team1";
+    if(shift==="Afternoon") return "Team2";
+  }
+}
+
+function getComplainTeam(day,shift){
+  let b=Math.floor((day-1)%6/2);
+  let map=[
+    ["Morning","Afternoon","Night"],
+    ["Night","Morning","Afternoon"],
+    ["Afternoon","Night","Morning"]
+  ];
+  let t=["Team3","Team4","Team5"];
+
+  for(let i=0;i<3;i++){
+    if(map[b][i]===shift) return t[i];
+  }
+}
+
+function getSSTeam(day,shift){
+  let b=Math.floor((day-1)%6/2);
+  let map=[
+    ["Morning","Afternoon","Night"],
+    ["Night","Morning","Afternoon"],
+    ["Afternoon","Night","Morning"]
+  ];
+  let t=["Team6","Team7","Team8"];
+
+  for(let i=0;i<3;i++){
+    if(map[b][i]===shift) return t[i];
+  }
+}
+
+function getDriver(date,shift){
+  let prev=new Date(date);
+  prev.setDate(prev.getDate()-1);
+
+  let team="";
+  if(shift==="Morning") team=getComplainTeam(prev.getDate(),"Night");
+  if(shift==="Afternoon") team=getComplainTeam(date.getDate(),"Morning");
+
+  return teamData[team]?.[0] || null;
+}
+
+function searchShift(){
+
+  error.innerText="";
+  results.style.display="none";
+
+  ["col0","col1","col2","col3","col4"].forEach(id=>window[id].innerHTML="");
+  ["card0","card1","card2","card3","card4"].forEach(id=>window[id].style.display="none");
+
+  if(!date.value || !shift.value){
+    error.innerText="Please select both date and shift.";
+    return;
+  }
+
+  let d=new Date(date.value);
+
+  let m=getMaintenanceTeam(d,shift.value);
+  let c=getComplainTeam(d.getDate(),shift.value);
+  let s=getSSTeam(d.getDate(),shift.value);
+
+  if(teamData[m]){
+    teamData[m].forEach(r=>{
+      let name=r?.[0];
+      let phone=safeTel(r?.[1]);
+
+      if(name){
+        col1.innerHTML += `<span class="result-name" onclick="location.href='tel:${phone}'">${name}</span>`;
+        card1.style.display="block";
       }
-    }
+    });
+  }
 
-    function saveToCache(data) {
-      try {
-        localStorage.setItem(DATA_KEY, JSON.stringify(data));
-        localStorage.setItem(TS_KEY, new Date().toISOString());
-      } catch (e) {
-        
-        console.warn("Cache save failed:", e);
+  let driver=getDriver(d,shift.value);
+  if(driver){
+    col1.innerHTML+=`<span class="result-name" onclick="location.href='tel:${safeTel(driver[1])}'">${driver[0]}</span>`;
+    card1.style.display="block";
+  }
+
+  if(teamData[c]){
+    teamData[c].forEach(r=>{
+      let name=r?.[0];
+      let phone=safeTel(r?.[1]);
+
+      if(name){
+        col2.innerHTML += `<span class="result-name" onclick="location.href='tel:${phone}'">${name}</span>`;
+        card2.style.display="block";
       }
-    }
+    });
+  }
 
-    async function loadDataOncePerDay() {
-      const statusEl = document.getElementById("status");
-      const lastTs = localStorage.getItem(TS_KEY);
-      const cached = loadFromCache();
+  let ss=teamData[s];
+  if(ss && ss.length>=3){
 
-      
-      if (cached && hoursSince(lastTs) < TTL_HOURS) {
-        workbookData = cached;
-        statusEl.textContent = "✅ Ready for today";
-        return;
-      }
+    col3.innerHTML+=`<span class="result-name" onclick="location.href='tel:${safeTel(ss[0][1])}'">${ss[0][0]}</span>`;
+    col4.innerHTML+=`<span class="result-name" onclick="location.href='tel:${safeTel(ss[1][1])}'">${ss[1][0]}</span>`;
+    col0.innerHTML+=`<span class="result-name" onclick="location.href='tel:${safeTel(ss[2][1])}'">${ss[2][0]}</span>`;
 
-     
-      try {
-        const res = await fetch(EXCEL_URL, { cache: "no-store" });
-        const buf = await res.arrayBuffer();
-        const workbook = XLSX.read(buf, { type: "array" });
-        const sheet = workbook.Sheets[workbook.SheetNames[0]];
-        workbookData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-        saveToCache(workbookData);
-        statusEl.textContent = "✅ Ready";
-      } catch (err) {
-        console.error(err);
-        if (cached) {
-      
-          workbookData = cached;
-          statusEl.textContent = "⚠️ Ready (stale cache; fetch failed)";
-        } else {
-          statusEl.textContent = "❌ Failed";
-        }
-      }
-    }
+    ["card0","card3","card4"].forEach(id=>window[id].style.display="block");
+  }
 
-    
-    loadDataOncePerDay();
+  results.style.display="grid";
+}
 
-    function formatDate(date) {
-      const d = new Date(date);
-      const day = String(d.getDate()).padStart(2, '0');
-      const month = String(d.getMonth() + 1).padStart(2, '0');
-      const year = d.getFullYear();
-      return `${day}/${month}/${year}`;
-    }
+</script>
 
-    function fillJustNow() {
-      const now = new Date();
-      document.getElementById("date").value = now.toISOString().split('T')[0];
-
-      const hour = now.getHours();
-      let shift = "";
-      if (hour >= 6 && hour < 14) shift = "Morning";
-      else if (hour >= 14 && hour < 22) shift = "Afternoon";
-      else shift = "Night";
-
-      document.getElementById("shift").value = shift;
-    }
-
-    function searchShift() {
-      const dateInputRaw = document.getElementById("date").value.trim();
-      const shiftInput = document.getElementById("shift").value.trim();
-      const error = document.getElementById("error");
-      const results = document.getElementById("results");
-      error.textContent = "";
-      results.style.display = "none";
-
-      ["col0", "col1", "col2", "col3", "col4"].forEach(id => {
-        document.getElementById(id).innerHTML = "";
-      });
-
-      ["card0", "card1", "card2", "card3", "card4"].forEach(id => {
-        document.getElementById(id).style.display = "none";
-      });
-
-      if (!dateInputRaw || !shiftInput) {
-        error.textContent = "Please select both date and shift.";
-        return;
-      }
-
-      const formattedInputDate = formatDate(new Date(dateInputRaw));
-      let lastDate = "", lastShift = "";
-
-      const matchingRows = workbookData.filter(row => {
-        let currentDate = row[0];
-        let currentShift = row[1];
-
-        if (!currentDate || currentDate.toString().trim() === "") currentDate = lastDate;
-        else lastDate = currentDate;
-
-        if (!currentShift || currentShift.toString().trim() === "") currentShift = lastShift;
-        else lastShift = currentShift;
-
-        let formattedExcelDate = "";
-
-        try {
-          if (currentDate instanceof Date) {
-            formattedExcelDate = formatDate(currentDate);
-          } else if (typeof currentDate === "number") {
-            const excelDate = XLSX.SSF.parse_date_code(currentDate);
-            const jsDate = new Date(excelDate.y, excelDate.m - 1, excelDate.d);
-            formattedExcelDate = formatDate(jsDate);
-          } else if (typeof currentDate === "string") {
-            const parts = currentDate.split(/[\/\-]/);
-            if (parts.length === 3) {
-              const jsDate = new Date(parts[2], parts[1] - 1, parts[0]);
-              formattedExcelDate = formatDate(jsDate);
-            }
-          }
-        } catch (e) {
-          console.error("Date parse error", e);
-        }
-
-        return (
-          formattedExcelDate === formattedInputDate &&
-          currentShift.toString().trim().toLowerCase() === shiftInput.toLowerCase()
-        );
-      });
-
-      if (matchingRows.length === 0) {
-        error.textContent = "No matching shifts found for the selected date and time.";
-        return;
-      }
-
-      results.style.display = "grid";
-
-      matchingRows.forEach(row => {
-        const data = [
-          [row[10], row[11]], 
-          [row[2], row[3]],   
-          [row[4], row[5]],   
-          [row[6], row[7]],   
-          [row[8], row[9]]    
-        ];
-
-        data.forEach(([name, phone], i) => {
-          if (name) {
-            const colId = "col" + i;
-            const cardId = "card" + i;
-            document.getElementById(colId).innerHTML += `
-              <span class="result-name ${i === 0 ? 'LM' : i === 1 ? 'LH' : i === 2 ? 'EA' : 'LEM'}" onclick="window.location.href='tel:${phone}'">${name}</span>
-            `;
-            document.getElementById(cardId).style.display = "block";
-          }
-        });
-      });
-    }
-  </script>
 </body>
 </html>
