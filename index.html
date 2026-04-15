@@ -282,11 +282,11 @@ function getSSTeam(day,shift){
 }
 
 function getDriver(date,shift){
-  let prev=new Date(date);
-  prev.setDate(prev.getDate()-1);
 
   let team="";
-  if(shift==="Morning") team=getComplainTeam(prev.getDate(),"Night");
+
+  if(shift==="Morning") team=getComplainTeam(date.getDate(),"Night");
+
   if(shift==="Afternoon") team=getComplainTeam(date.getDate(),"Morning");
 
   return teamData[team]?.[0] || null;
