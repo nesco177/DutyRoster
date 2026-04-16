@@ -225,11 +225,20 @@ async function loadData(){
 loadData();
 
 function fillJustNow(){
-  let now=new Date();
-  date.value=now.toISOString().split('T')[0];
+  let now = new Date();
+  date.value = now.toISOString().split('T')[0];
 
-  let h=now.getHours();
-  shift.value=h<14?"Morning":h<22?"Afternoon":"Night";
+  let h = now.getHours();
+
+  if(h >= 6 && h < 14){
+    shift.value = "Morning";
+  } 
+  else if(h >= 14 && h < 22){
+    shift.value = "Afternoon";
+  } 
+  else {
+    shift.value = "Night";
+  }
 }
 
 function safeTel(p){
